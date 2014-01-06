@@ -22,4 +22,11 @@ end
 describe '/cookbooks' do
   subject { '/cookbooks' }
   should_behave_like 'JSON'
+
+  context 'with no cookbooks' do
+    it 'returns an empty hash' do
+      get subject
+      JSON.parse(last_response.body).should eq(Hash.new)
+    end
+  end
 end
