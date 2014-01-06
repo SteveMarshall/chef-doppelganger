@@ -3,7 +3,11 @@ require 'json'
 
 require File.expand_path '../spec_helper.rb', __FILE__
 
-shared_examples 'json' do
+RSpec.configure do |c|
+  c.alias_it_should_behave_like_to :should_behave_like, 'should behave like'
+end
+
+shared_examples 'JSON' do
   it 'should return a JSON Content-Type header' do
     get subject
     last_response.headers['Content-Type'].should match(%r{application/json\b})
@@ -15,7 +19,7 @@ shared_examples 'json' do
   end
 end
 
-describe 'Cookbook list' do
+describe '/cookbooks' do
   subject { '/cookbooks' }
-  it_should_behave_like 'json'
+  should_behave_like 'JSON'
 end
