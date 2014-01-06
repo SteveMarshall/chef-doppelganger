@@ -6,7 +6,7 @@ require File.expand_path '../spec_helper.rb', __FILE__
 shared_examples 'JSON' do
   it 'should return a JSON Content-Type header' do
     get subject
-    last_response.headers['Content-Type'].should match(%r{application/json\b})
+    last_response.headers['Content-Type'].should match(%r{^application/json\b})
   end
 
   it 'should return valid JSON' do
