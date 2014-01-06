@@ -8,4 +8,7 @@ module RSpecMixin
 end
 
 # For RSpec 2.x
-RSpec.configure { |c| c.include RSpecMixin }
+RSpec.configure do |c|
+  c.include RSpecMixin
+  c.alias_it_should_behave_like_to :should_behave_like, 'should behave like'
+end
