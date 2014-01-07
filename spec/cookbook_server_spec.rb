@@ -5,6 +5,8 @@ require 'fileutils'
 
 require File.expand_path '../spec_helper.rb', __FILE__
 
+# TODO: Test tags of the form X.Y.Z as well as vX.Y.Z
+
 shared_examples 'JSON' do
   it 'returns a JSON Content-Type header' do
     get subject
