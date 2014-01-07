@@ -57,10 +57,10 @@ describe 'with no cookbooks' do
   
   context '/cookbooks/test' do
     subject { '/cookbooks/test' }
-    
+
     it 'is not found' do
       get subject
-      expect(last_response.not_found?).to be_true
+      last_response.not_found?.should be_true
     end
   end
 end
