@@ -17,6 +17,21 @@ shared_examples 'JSON' do
   end
 end
 
+RSpec::Matchers.define :a_hash_like do |expected|
+  match do |actual|
+    # Only check the hash contains the keys/values we want to check
+    # We don't care if it contains more, which is what equality does
+    matches = true
+    expected.each do |k,v|
+      matches &&= (actual[k] == v)
+    end
+    matches
+  end
+  description do
+    "a hash like #{expected}"
+  end
+end
+
 shared_examples "a cookbook" do |versions|
   in_temp_dir do |tmp_path|
     before(:all) do
@@ -34,12 +49,12 @@ shared_examples "a cookbook" do |versions|
       
       result[@name]['versions'].should be_instance_of(Array)
       result[@name]['versions'].length.should eq(versions.length)
-      versions.each do |version|
-        result[@name]['versions'].should include({
+      versions.each { |version|
+        result[@name]['versions'].should include(a_hash_like({
           "url" => "/cookbooks/#{@name}/#{version}",
           "version" => version
-        })
-      end
+        }))
+      }
     end
 
     it "lists versions in descending order" do
