@@ -16,6 +16,25 @@ def in_temp_dir()
   end
 end
 
+def prepare_cookbook(path, versions)
+  # Initialise our test repo
+  repo = Git.init(path)
+  
+  # Add dummy data
+  Dir.chdir(path) do
+    versions.each do |version|
+      FileUtils.touch("tmp")
+      repo.add('tmp')
+      repo.commit(version)
+      repo.add_tag("v#{version}")
+    end
+  end
+  
+  # Finalise the structure
+  FileUtils.mv(File.join(path, ".git"), "#{path}.git")
+  FileUtils.rmdir(path)
+end
+
 # For RSpec 2.x
 RSpec.configure do |c|
   c.include RSpecMixin

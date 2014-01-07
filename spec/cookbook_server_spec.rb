@@ -35,21 +35,7 @@ describe '/cookbooks' do
         @name = 'test'
         @version = '0.1.0'
         
-        # Initialise our test repo
-        repo_path = File.join(tmp_path, @name)
-        @repo = Git.init(repo_path)
-        
-        # Add dummy data
-        FileUtils.touch(File.join(repo_path, "tmp"))
-        Dir.chdir(repo_path) do
-          @repo.add('tmp')
-          @repo.commit('test')
-          @repo.add_tag("v#{@version}")
-        end
-        
-        # Finalise the structure
-        FileUtils.mv(File.join(repo_path, ".git"), "#{repo_path}.git")
-        FileUtils.rmdir(repo_path)
+        prepare_cookbook(File.join(tmp_path, @name), [@version])
       end
 
       it 'returns the cookbook in a hash with URL and versions' do
