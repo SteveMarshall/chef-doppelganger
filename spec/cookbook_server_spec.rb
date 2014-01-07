@@ -77,6 +77,14 @@ shared_examples "a cookbook" do |versions|
       get JSON.parse(last_response.body)[@name]['url']
       last_response.should be_ok
     end
+    
+    it "provides working links to its versions" do
+      get subject
+      JSON.parse(last_response.body)[@name]['versions'].each do |version|
+        get version['url']
+        last_response.should be_ok
+      end
+    end
   end
 end
 

@@ -28,6 +28,10 @@ get '/cookbooks/:name' do
   }.to_json
 end
 
+get '/cookbooks/:name/:version' do
+  ""
+end
+
 def render_cookbook(path)
   name = File.basename(path, ".git")
   repo = Git.bare(path)
