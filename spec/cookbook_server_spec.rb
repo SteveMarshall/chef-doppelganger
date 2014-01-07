@@ -48,11 +48,8 @@ describe 'with a cookbook' do
       prepare_cookbook(File.join(tmp_path, @name), [@version])
     end
 
-    context '/cookbooks' do
-      subject { '/cookbooks' }
-      behaves_like 'JSON'
-      
-      it 'returns the cookbook in a hash with URL and versions' do
+    shared_examples 'a single cookbook' do
+      it 'returns the cookbook in a hash with URL and version' do
         get subject
         JSON.parse(last_response.body).should eq({
           @name => {
@@ -64,6 +61,18 @@ describe 'with a cookbook' do
           }
         })
       end
+    end
+
+    context '/cookbooks' do
+      subject { '/cookbooks' }
+      behaves_like 'JSON'
+      behaves_like 'a single cookbook'
+    end
+
+    context '/cookbooks/test' do
+      subject { '/cookbooks/test' }
+      behaves_like 'JSON'
+      behaves_like 'a single cookbook'
     end
   end
 end
