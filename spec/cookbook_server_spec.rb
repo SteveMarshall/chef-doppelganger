@@ -27,17 +27,19 @@ shared_examples "a cookbook" do |versions|
 
     it "returns the cookbook in a hash with URL and #{versions.length} version(s)" do
       get subject
-      JSON.parse(last_response.body).should eq({
-        @name => {
-          "url" => "/cookbooks/#{@name}",
-          "versions" => versions.map { |version|
-            {
-              "url" => "/cookbooks/#{@name}/#{version}",
-              "version" => version
-            }
-          }
-        }
-      })
+      result = JSON.parse(last_response.body)
+      
+      result.has_key?(@name).should be_true
+      result[@name]["url"].should eq("/cookbooks/#{@name}")
+      
+      result[@name]['versions'].should be_instance_of(Array)
+      result[@name]['versions'].length.should eq(versions.length)
+      versions.each do |version|
+        result[@name]['versions'].should include({
+          "url" => "/cookbooks/#{@name}/#{version}",
+          "version" => version
+        })
+      end
     end
   end
 end
