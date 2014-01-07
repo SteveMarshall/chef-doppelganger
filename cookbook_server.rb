@@ -31,6 +31,16 @@ end
 get '/cookbooks/:name/:version' do
   path = "#{settings.cookbook_store}/#{params[:name]}.git"
   pass unless Dir.exists?(path)
+  
+  repo = Git.bare(path)
+  begin
+    version = repo.tag("v#{params[:version]}")
+  rescue Git::GitTagNameDoesNotExist
+    pass
+  end
+  
+  content_type :json
+  "{}"
 end
 
 def render_cookbook(path)
