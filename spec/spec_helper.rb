@@ -1,4 +1,5 @@
 require 'rack/test'
+require 'rspec'
 require 'tmpdir'
 
 require 'simplecov'
