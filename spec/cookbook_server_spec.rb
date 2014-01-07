@@ -42,19 +42,19 @@ shared_examples "a cookbook" do |versions|
       end
     end
 
-    it "orders its versions in descending order" do
+    it "lists versions in descending order" do
       get subject
-      sorted_versions = versions.sort { |x,y|
-        Gem::Version.new(x) <=> Gem::Version.new(y)
-      }
-      sorted_versions = sorted_versions.map { |version|
-        {
-          "url" => "/cookbooks/#{@name}/#{version}",
-          "version" => version
-        }
-      }
+      # Use Gem::Version for ordering so 0.2 < 0.10
+      descending_versions = versions.sort_by{ |version|
+        Gem::Version.new(version)
+      }.reverse
       
-      response_versions = JSON.parse(last_response.body)[@name]['versions'].should eq(sorted_versions.reverse)
+      # Extract just the version numbers for comparison
+      response_versions = JSON.parse(last_response.body)[@name]['versions']
+      response_versions = response_versions.map { |version|
+        version["version"]
+      }
+      response_versions.should eq(descending_versions)
     end
   end
 end
