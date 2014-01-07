@@ -17,27 +17,32 @@ shared_examples 'JSON' do
   end
 end
 
-describe '/cookbooks' do
-  subject { '/cookbooks' }
-  should_behave_like 'JSON'
+describe 'with no cookbooks' do
+  context '/cookbooks' do
+    subject { '/cookbooks' }
+    should_behave_like 'JSON'
 
-  context 'with no cookbooks' do
     it 'returns an empty hash' do
       get subject
       JSON.parse(last_response.body).should eq(Hash.new)
     end
   end
+end
 
-  context 'with a cookbook' do
-    in_temp_dir do |tmp_path|
-      before(:all) do
-        app.set :cookbook_store, tmp_path
-        @name = 'test'
-        @version = '0.1.0'
-        
-        prepare_cookbook(File.join(tmp_path, @name), [@version])
-      end
+describe 'with a cookbook' do
+  in_temp_dir do |tmp_path|
+    before(:all) do
+      app.set :cookbook_store, tmp_path
+      @name = 'test'
+      @version = '0.1.0'
+      
+      prepare_cookbook(File.join(tmp_path, @name), [@version])
+    end
 
+    context '/cookbooks' do
+      subject { '/cookbooks' }
+      should_behave_like 'JSON'
+      
       it 'returns the cookbook in a hash with URL and versions' do
         get subject
         JSON.parse(last_response.body).should eq({
