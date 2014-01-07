@@ -17,6 +17,31 @@ shared_examples 'JSON' do
   end
 end
 
+shared_examples "a cookbook" do |versions|
+  in_temp_dir do |tmp_path|
+    before(:all) do
+      @name = 'test'
+      app.set :cookbook_store, tmp_path
+      prepare_cookbook(File.join(tmp_path, @name), versions)
+    end
+
+    it "returns the cookbook in a hash with URL and #{versions.length} version(s)" do
+      get subject
+      JSON.parse(last_response.body).should eq({
+        @name => {
+          "url" => "/cookbooks/#{@name}",
+          "versions" => versions.map { |version|
+            {
+              "url" => "/cookbooks/#{@name}/#{version}",
+              "version" => version
+            }
+          }
+        }
+      })
+    end
+  end
+end
+
 describe 'with no cookbooks' do
   context '/cookbooks' do
     subject { '/cookbooks' }
@@ -39,40 +64,16 @@ describe 'with no cookbooks' do
 end
 
 describe 'with a cookbook' do
-  in_temp_dir do |tmp_path|
-    before(:all) do
-      app.set :cookbook_store, tmp_path
-      @name = 'test'
-      @version = '0.1.0'
-      
-      prepare_cookbook(File.join(tmp_path, @name), [@version])
-    end
+  versions = ['0.1.0']
+  context '/cookbooks' do
+    subject { '/cookbooks' }
+    behaves_like 'JSON'
+    behaves_like 'a cookbook', versions
+  end
 
-    shared_examples 'a single cookbook' do
-      it 'returns the cookbook in a hash with URL and version' do
-        get subject
-        JSON.parse(last_response.body).should eq({
-          @name => {
-            "url" => "/cookbooks/#{@name}",
-            "versions" => [{
-              "url" => "/cookbooks/#{@name}/#{@version}",
-              "version" => @version
-            }]
-          }
-        })
-      end
-    end
-
-    context '/cookbooks' do
-      subject { '/cookbooks' }
-      behaves_like 'JSON'
-      behaves_like 'a single cookbook'
-    end
-
-    context '/cookbooks/test' do
-      subject { '/cookbooks/test' }
-      behaves_like 'JSON'
-      behaves_like 'a single cookbook'
-    end
+  context '/cookbooks/test' do
+    subject { '/cookbooks/test' }
+    behaves_like 'JSON'
+    behaves_like 'a cookbook', versions
   end
 end
