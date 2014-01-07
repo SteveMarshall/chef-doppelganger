@@ -29,7 +29,7 @@ shared_examples "a cookbook" do |versions|
       get subject
       result = JSON.parse(last_response.body)
       
-      result.has_key?(@name).should be_true
+      result.should have_key(@name)
       result[@name]["url"].should eq("/cookbooks/#{@name}")
       
       result[@name]['versions'].should be_instance_of(Array)
