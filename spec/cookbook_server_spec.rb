@@ -6,12 +6,12 @@ require 'fileutils'
 require File.expand_path '../spec_helper.rb', __FILE__
 
 shared_examples 'JSON' do
-  it 'should return a JSON Content-Type header' do
+  it 'returns a JSON Content-Type header' do
     get subject
     last_response.headers['Content-Type'].should match(%r{^application/json\b})
   end
 
-  it 'should return valid JSON' do
+  it 'returns valid JSON' do
     get subject
     expect { JSON.parse last_response.body }.not_to raise_error
   end
@@ -20,7 +20,7 @@ end
 describe 'with no cookbooks' do
   context '/cookbooks' do
     subject { '/cookbooks' }
-    should_behave_like 'JSON'
+    behaves_like 'JSON'
 
     it 'returns an empty hash' do
       get subject
@@ -41,7 +41,7 @@ describe 'with a cookbook' do
 
     context '/cookbooks' do
       subject { '/cookbooks' }
-      should_behave_like 'JSON'
+      behaves_like 'JSON'
       
       it 'returns the cookbook in a hash with URL and versions' do
         get subject
