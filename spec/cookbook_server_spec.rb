@@ -98,9 +98,18 @@ describe 'with no cookbooks' do
       JSON.parse(last_response.body).should eq(Hash.new)
     end
   end
-  
+
   context '/cookbooks/test' do
     subject { '/cookbooks/test' }
+
+    it 'is not found' do
+      get subject
+      last_response.should be_not_found
+    end
+  end
+
+  context '/cookbooks/test/0.1.0' do
+    subject { '/cookbooks/test/0.1.0' }
 
     it 'is not found' do
       get subject

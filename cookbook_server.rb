@@ -29,7 +29,8 @@ get '/cookbooks/:name' do
 end
 
 get '/cookbooks/:name/:version' do
-  ""
+  path = "#{settings.cookbook_store}/#{params[:name]}.git"
+  pass unless Dir.exists?(path)
 end
 
 def render_cookbook(path)
