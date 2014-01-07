@@ -104,7 +104,7 @@ describe 'with no cookbooks' do
 
     it 'is not found' do
       get subject
-      last_response.not_found?.should be_true
+      last_response.should be_not_found
     end
   end
 end
