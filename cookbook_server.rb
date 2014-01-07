@@ -35,10 +35,13 @@ def render_cookbook(path)
   versions = repo.tags.map do |tag|
     tag_to_chef_version(name, tag)
   end
+  versions = versions.sort_by do |version|
+    Gem::Version.new(version[:version])
+  end
 
   {
     url: "/cookbooks/#{name}",
-    versions: versions,
+    versions: versions.reverse,
   }
 end
 

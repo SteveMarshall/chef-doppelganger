@@ -26,7 +26,9 @@ def prepare_cookbook(path, versions)
   # Add dummy data
   Dir.chdir(path) do
     versions.each do |version|
-      FileUtils.touch("tmp")
+      File.open('tmp', 'w') do |f|
+        f.puts version
+      end
       repo.add('tmp')
       repo.commit(version)
       repo.add_tag("v#{version}")

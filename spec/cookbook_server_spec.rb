@@ -41,6 +41,21 @@ shared_examples "a cookbook" do |versions|
         })
       end
     end
+
+    it "orders its versions in descending order" do
+      get subject
+      sorted_versions = versions.sort { |x,y|
+        Gem::Version.new(x) <=> Gem::Version.new(y)
+      }
+      sorted_versions = sorted_versions.map { |version|
+        {
+          "url" => "/cookbooks/#{@name}/#{version}",
+          "version" => version
+        }
+      }
+      
+      response_versions = JSON.parse(last_response.body)[@name]['versions'].should eq(sorted_versions.reverse)
+    end
   end
 end
 
@@ -65,8 +80,23 @@ describe 'with no cookbooks' do
   end
 end
 
-describe 'with a cookbook' do
+describe 'with a cookbook with 1 version' do
   versions = ['0.1.0']
+  context '/cookbooks' do
+    subject { '/cookbooks' }
+    behaves_like 'JSON'
+    behaves_like 'a cookbook', versions
+  end
+
+  context '/cookbooks/test' do
+    subject { '/cookbooks/test' }
+    behaves_like 'JSON'
+    behaves_like 'a cookbook', versions
+  end
+end
+
+describe 'with a cookbook with 3 versions' do
+  versions = ['0.1.0', '0.2.0', '0.10.0']
   context '/cookbooks' do
     subject { '/cookbooks' }
     behaves_like 'JSON'
