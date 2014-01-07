@@ -27,6 +27,15 @@ describe 'with no cookbooks' do
       JSON.parse(last_response.body).should eq(Hash.new)
     end
   end
+  
+  context '/cookbooks/test' do
+    subject { '/cookbooks/test' }
+    
+    it 'is not found' do
+      get subject
+      expect(last_response.not_found?).to be_true
+    end
+  end
 end
 
 describe 'with a cookbook' do
