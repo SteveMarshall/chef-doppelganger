@@ -8,4 +8,5 @@ group :development, :test do
   gem 'berkshelf'
   gem 'rspec'
   gem 'debugger'
+  gem 'simplecov'
 end

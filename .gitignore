@@ -19,3 +19,4 @@ VERSION
 .kitchen.local.yml
 
 results/
+coverage/
