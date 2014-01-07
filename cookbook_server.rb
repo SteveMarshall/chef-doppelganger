@@ -8,17 +8,9 @@ set :cookbook_store, Dir.pwd
 
 get '/cookbooks' do
   cookbooks = Hash.new
-  Dir.glob("#{settings.cookbook_store}/*.git") do |cookbook_path|
-    name = File.basename(cookbook_path, ".git")
-    repo = Git.bare(cookbook_path)
-
-    versions = repo.tags.reverse.map do |tag|
-      tag_to_chef_version(name, tag)
-    end
-    cookbooks[name] = {
-      url: "/cookbooks/#{name}",
-      versions: versions.reverse,
-    }
+  Dir.glob("#{settings.cookbook_store}/*.git") do |path|
+    name = File.basename(path, ".git")
+    cookbooks[name] = render_cookbook(path)
   end
 
   content_type :json
@@ -26,22 +18,27 @@ get '/cookbooks' do
 end
 
 get '/cookbooks/:name' do
-  cookbook_path = "#{settings.cookbook_store}/#{params[:name]}.git"
-  pass unless Dir.exists?(cookbook_path)
-  name = File.basename(cookbook_path, ".git")
-  repo = Git.bare(cookbook_path)
-
-  versions = repo.tags.reverse.map do |tag|
-    tag_to_chef_version(name, tag)
-  end
+  path = "#{settings.cookbook_store}/#{params[:name]}.git"
+  pass unless Dir.exists?(path)
 
   content_type :json
   {
-    name => {
-      url: "/cookbooks/#{name}",
-      versions: versions.reverse,
-    }
+    params[:name] => render_cookbook(path)
   }.to_json
+end
+
+def render_cookbook(path)
+  name = File.basename(path, ".git")
+  repo = Git.bare(path)
+
+  versions = repo.tags.map do |tag|
+    tag_to_chef_version(name, tag)
+  end
+
+  {
+    url: "/cookbooks/#{name}",
+    versions: versions,
+  }
 end
 
 def tag_to_chef_version(cookbook_name, version_tag)
