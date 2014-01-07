@@ -71,6 +71,12 @@ shared_examples "a cookbook" do |versions|
       }
       response_versions.should eq(descending_versions)
     end
+
+    it "provides a working link to itself" do
+      get subject
+      get JSON.parse(last_response.body)[@name]['url']
+      last_response.should be_ok
+    end
   end
 end
 
