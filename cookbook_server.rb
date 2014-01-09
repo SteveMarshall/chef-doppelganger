@@ -28,6 +28,25 @@ get '/cookbooks/:name' do
   }.to_json
 end
 
+# Based on https://github.com/opscode/chef-zero/blob/master/lib/chef_zero/cookbook_data.rb#L66
+class PretendCookbookMetadata < Hash
+  def initialize(cookbook_name)
+    self.name(cookbook_name)
+    %w(attributes grouping dependencies supports recommendations suggestions
+       conflicting providing replacing recipes).each do |hash_arg|
+      self[hash_arg.to_sym] = Hash.new
+    end
+  end
+  
+  def method_missing(key, value = nil)
+    if value.nil?
+      self[key.to_sym]
+    else
+      store key.to_sym, value
+    end
+  end
+end
+
 get '/cookbooks/:name/:version' do
   path = "#{settings.cookbook_store}/#{params[:name]}.git"
   pass unless Dir.exists?(path)
@@ -39,12 +58,17 @@ get '/cookbooks/:name/:version' do
     pass
   end
   
+  version_tree = repo.gtree("#{version}^{tree}")
+  
+  metadata = PretendCookbookMetadata.new(params[:name])
+  metadata.instance_eval(version_tree.files['metadata.rb'].contents)
   content_type :json
   {
     name: "#{params[:name]}-#{params[:version]}",
     cookbook_name: params[:name],
     version: params[:version],
     json_class:"Chef::CookbookVersion",
+    metadata: metadata
   }.to_json
 end
 

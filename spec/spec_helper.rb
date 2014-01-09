@@ -20,17 +20,22 @@ def in_temp_dir()
   end
 end
 
-def prepare_cookbook(path, versions)
+def prepare_cookbook(root, name, versions)
   # Initialise our test repo
+  path = File.join(root, name)
   repo = Git.init(path)
   
   # Add dummy data
   Dir.chdir(path) do
     versions.each do |version|
-      File.open('tmp', 'w') do |f|
-        f.puts version
+      File.open('metadata.rb', 'w') do |f|
+        f.puts <<-EOF
+name    "#{name}"
+version "#{version}"
+description "A test cookbook"
+EOF
       end
-      repo.add('tmp')
+      repo.add('metadata.rb')
       repo.commit(version)
       repo.add_tag("v#{version}")
     end

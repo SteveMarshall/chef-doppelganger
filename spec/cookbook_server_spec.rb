@@ -1,7 +1,6 @@
 # spec/app_spec.rb
 require 'git'
 require 'json'
-require 'fileutils'
 
 require File.expand_path '../spec_helper.rb', __FILE__
 
@@ -48,6 +47,15 @@ shared_examples 'a cookbook version' do |cookbook_name, version|
     result["version"].should eq(version)
     result["name"].should eq("#{cookbook_name}-#{version}")
   end
+  
+  it 'returns metadata from metadata.rb' do
+    get subject
+    result = JSON.parse(last_response.body)
+    
+    result['metadata']['name'].should eq(cookbook_name)
+    result['metadata']['version'].should eq(version)
+    result['metadata']['description'].should eq("A test cookbook")
+  end
 end
 
 shared_examples "a cookbook" do |versions|
@@ -57,7 +65,7 @@ shared_examples "a cookbook" do |versions|
     before(:all) do
       @name = 'test'
       app.set :cookbook_store, tmp_path
-      prepare_cookbook(File.join(tmp_path, @name), versions)
+      prepare_cookbook(tmp_path, @name, versions)
     end
 
     it "returns the cookbook in a hash with URL and #{versions.length} version(s)" do
