@@ -36,6 +36,18 @@ end
 
 shared_examples 'a cookbook version' do |cookbook_name, version|
   behaves_like 'JSON'
+
+  it "returns basic metadata" do
+    get subject
+    result = JSON.parse(last_response.body)
+    
+    # TODO: Do we need other root properties?
+    #       (chef_type=cookbook_version, json_class:Chef::CookbookVersion,
+    #       and frozen?)
+    result["cookbook_name"].should eq(cookbook_name)
+    result["version"].should eq(version)
+    result["name"].should eq("#{cookbook_name}-#{version}")
+  end
 end
 
 shared_examples "a cookbook" do |versions|

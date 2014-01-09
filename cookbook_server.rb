@@ -40,7 +40,11 @@ get '/cookbooks/:name/:version' do
   end
   
   content_type :json
-  "{}"
+  {
+    name: "#{params[:name]}-#{params[:version]}",
+    cookbook_name: params[:name],
+    version: params[:version],
+  }.to_json
 end
 
 def render_cookbook(path)
