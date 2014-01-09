@@ -44,6 +44,7 @@ get '/cookbooks/:name/:version' do
     name: "#{params[:name]}-#{params[:version]}",
     cookbook_name: params[:name],
     version: params[:version],
+    json_class:"Chef::CookbookVersion",
   }.to_json
 end
 

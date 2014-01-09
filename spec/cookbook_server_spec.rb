@@ -42,8 +42,8 @@ shared_examples 'a cookbook version' do |cookbook_name, version|
     result = JSON.parse(last_response.body)
     
     # TODO: Do we need other root properties?
-    #       (chef_type=cookbook_version, json_class:Chef::CookbookVersion,
-    #       and frozen?)
+    #       (chef_type=cookbook_version and frozen?)
+    result['json_class'].should eq('Chef::CookbookVersion')
     result["cookbook_name"].should eq(cookbook_name)
     result["version"].should eq(version)
     result["name"].should eq("#{cookbook_name}-#{version}")
