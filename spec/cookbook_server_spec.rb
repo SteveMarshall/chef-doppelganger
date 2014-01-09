@@ -34,7 +34,13 @@ RSpec::Matchers.define :a_hash_like do |expected|
   end
 end
 
+shared_examples 'a cookbook version' do |cookbook_name, version|
+  behaves_like 'JSON'
+end
+
 shared_examples "a cookbook" do |versions|
+  behaves_like 'JSON'
+
   in_temp_dir do |tmp_path|
     before(:all) do
       @name = 'test'
@@ -87,6 +93,27 @@ shared_examples "a cookbook" do |versions|
         last_response.should be_ok
       end
     end
+
+    versions.each do |version|
+      context "/cookbooks/test/#{version}" do
+        subject { "/cookbooks/test/#{version}" }
+        behaves_like 'a cookbook version', 'test', version
+      end
+
+      unknown_version = Gem::Version.new(version).bump
+      while versions.include?(unknown_version) do
+        unknown_version = Gem::Version.new(version).bump
+      end
+
+      context "/cookbooks/test/#{unknown_version}" do
+        subject { "/cookbooks/test/#{unknown_version}" }
+
+        it 'is not found' do
+          get subject
+          last_response.should be_not_found
+        end
+      end
+    end
   end
 end
 
@@ -124,28 +151,12 @@ describe 'with a cookbook with 1 version' do
   versions = ['0.1.0']
   context '/cookbooks' do
     subject { '/cookbooks' }
-    behaves_like 'JSON'
     behaves_like 'a cookbook', versions
   end
 
   context '/cookbooks/test' do
     subject { '/cookbooks/test' }
-    behaves_like 'JSON'
     behaves_like 'a cookbook', versions
-  end
-
-  context '/cookbooks/test/0.1.0' do
-    subject { '/cookbooks/test/0.1.0' }
-    behaves_like 'JSON'
-  end
-
-  context '/cookbooks/test/0.1.1' do
-    subject { '/cookbooks/test/0.1.1' }
-
-    it 'is not found' do
-      get subject
-      last_response.should be_not_found
-    end
   end
 end
 
@@ -153,30 +164,11 @@ describe 'with a cookbook with 3 versions' do
   versions = ['0.1.0', '0.2.0', '0.10.0']
   context '/cookbooks' do
     subject { '/cookbooks' }
-    behaves_like 'JSON'
     behaves_like 'a cookbook', versions
   end
 
   context '/cookbooks/test' do
     subject { '/cookbooks/test' }
-    behaves_like 'JSON'
     behaves_like 'a cookbook', versions
-  end
-  
-  versions.each do |version|
-    context "/cookbooks/test/#{version}" do
-      subject { "/cookbooks/test/#{version}" }
-      behaves_like 'JSON'
-    end
-    
-    unknown_version = Gem::Version.new(version).bump
-    context "/cookbooks/test/#{unknown_version}" do
-      subject { "/cookbooks/test/#{unknown_version}" }
-
-      it 'is not found' do
-        get subject
-        last_response.should be_not_found
-      end
-    end
   end
 end
