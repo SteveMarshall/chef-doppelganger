@@ -39,9 +39,7 @@ class PretendCookbookMetadata < Hash
   end
   
   def method_missing(key, value = nil)
-    if value.nil?
-      self[key.to_sym]
-    else
+    unless value.nil?
       store key.to_sym, value
     end
   end
