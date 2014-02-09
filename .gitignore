@@ -17,6 +17,3 @@ bin/*
 VERSION
 .kitchen/
 .kitchen.local.yml
-
-results/
-coverage/

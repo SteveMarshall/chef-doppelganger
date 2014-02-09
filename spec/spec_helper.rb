@@ -2,9 +2,6 @@ require 'rack/test'
 require 'rspec'
 require 'tmpdir'
 
-require 'simplecov'
-SimpleCov.start
-
 require File.expand_path '../../cookbook_server.rb', __FILE__
 
 module RSpecMixin
@@ -50,9 +47,4 @@ end
 RSpec.configure do |c|
   c.include RSpecMixin
   c.alias_it_should_behave_like_to :behaves_like, 'behaves like'
-end
-
-SimpleCov.at_exit do
-  SimpleCov.result.format!
-  SimpleCov.minimum_coverage 100
 end
