@@ -6,18 +6,6 @@ require File.expand_path '../spec_helper.rb', __FILE__
 
 # TODO: Test tags of the form X.Y.Z as well as vX.Y.Z
 
-shared_examples 'JSON' do
-  it 'returns a JSON Content-Type header' do
-    get subject
-    last_response.headers['Content-Type'].should match(%r{^application/json\b})
-  end
-
-  it 'returns valid JSON' do
-    get subject
-    expect { JSON.parse last_response.body }.not_to raise_error
-  end
-end
-
 RSpec::Matchers.define :a_hash_like do |expected|
   match do |actual|
     # Only check the hash contains the keys/values we want to check
@@ -30,6 +18,18 @@ RSpec::Matchers.define :a_hash_like do |expected|
   end
   description do
     "a hash like #{expected}"
+  end
+end
+
+shared_examples 'JSON' do
+  it 'returns a JSON Content-Type header' do
+    get subject
+    last_response.headers['Content-Type'].should match(%r{^application/json\b})
+  end
+
+  it 'returns valid JSON' do
+    get subject
+    expect { JSON.parse last_response.body }.not_to raise_error
   end
 end
 
