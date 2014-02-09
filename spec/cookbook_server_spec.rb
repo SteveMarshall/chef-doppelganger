@@ -1,8 +1,5 @@
-# spec/app_spec.rb
-require 'git'
+require 'spec_helper'
 require 'json'
-
-require File.expand_path '../spec_helper.rb', __FILE__
 
 # TODO: Test tags of the form X.Y.Z as well as vX.Y.Z
 
