@@ -1,4 +1,4 @@
-require File.expand_path '../cookbook_server.rb', __FILE__
+require './lib/cookbook_server'
 set :environment, :production
 set :cookbook_store, "./cookbooks"
 run Sinatra::Application

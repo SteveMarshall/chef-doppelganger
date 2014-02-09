@@ -2,7 +2,7 @@ require 'rack/test'
 require 'rspec'
 require 'tmpdir'
 
-require File.expand_path '../../cookbook_server.rb', __FILE__
+require 'cookbook_server'
 
 module RSpecMixin
   include Rack::Test::Methods
