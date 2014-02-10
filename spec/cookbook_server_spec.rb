@@ -58,77 +58,69 @@ end
 shared_examples "a cookbook" do |versions|
   behaves_like 'JSON'
 
-  in_temp_dir do |tmp_path|
-    before(:all) do
-      @name = 'test'
-      app.set :cookbook_store, tmp_path
-      prepare_cookbook(tmp_path, @name, versions)
-    end
+  it "returns the cookbook in a hash with URL and #{versions.length} version(s)" do
+    get subject
+    result = JSON.parse(last_response.body)
+    
+    result.should have_key(@name)
+    result[@name]["url"].should eq("/cookbooks/#{@name}")
+    
+    result[@name]['versions'].should be_instance_of(Array)
+    result[@name]['versions'].length.should eq(versions.length)
+    versions.each { |version|
+      result[@name]['versions'].should include(a_hash_like({
+        "url" => "/cookbooks/#{@name}/#{version}",
+        "version" => version
+      }))
+    }
+  end
 
-    it "returns the cookbook in a hash with URL and #{versions.length} version(s)" do
-      get subject
-      result = JSON.parse(last_response.body)
-      
-      result.should have_key(@name)
-      result[@name]["url"].should eq("/cookbooks/#{@name}")
-      
-      result[@name]['versions'].should be_instance_of(Array)
-      result[@name]['versions'].length.should eq(versions.length)
-      versions.each { |version|
-        result[@name]['versions'].should include(a_hash_like({
-          "url" => "/cookbooks/#{@name}/#{version}",
-          "version" => version
-        }))
-      }
-    end
+  it "lists versions in descending order" do
+    get subject
+    # Use Gem::Version for ordering so 0.2 < 0.10
+    descending_versions = versions.sort_by{ |version|
+      Gem::Version.new(version)
+    }.reverse
+    
+    # Extract just the version numbers for comparison
+    response_versions = JSON.parse(last_response.body)[@name]['versions']
+    response_versions = response_versions.map { |version|
+      version["version"]
+    }
+    response_versions.should eq(descending_versions)
+  end
 
-    it "lists versions in descending order" do
-      get subject
-      # Use Gem::Version for ordering so 0.2 < 0.10
-      descending_versions = versions.sort_by{ |version|
-        Gem::Version.new(version)
-      }.reverse
-      
-      # Extract just the version numbers for comparison
-      response_versions = JSON.parse(last_response.body)[@name]['versions']
-      response_versions = response_versions.map { |version|
-        version["version"]
-      }
-      response_versions.should eq(descending_versions)
-    end
-
-    it "provides a working link to itself" do
-      get subject
-      get JSON.parse(last_response.body)[@name]['url']
+  it "provides a working link to itself" do
+    get subject
+    get JSON.parse(last_response.body)[@name]['url']
+    last_response.should be_ok
+  end
+  
+  it "provides working links to its versions" do
+    get subject
+    JSON.parse(last_response.body)[@name]['versions'].each do |version|
+      get version['url']
       last_response.should be_ok
     end
-    
-    it "provides working links to its versions" do
-      get subject
-      JSON.parse(last_response.body)[@name]['versions'].each do |version|
-        get version['url']
-        last_response.should be_ok
-      end
+  end
+
+  versions.each do |version|
+    context "/cookbooks/test/#{version}" do
+      subject { "/cookbooks/test/#{version}" }
+      behaves_like 'a cookbook version', 'test', version
     end
 
-    versions.each do |version|
-      context "/cookbooks/test/#{version}" do
-        subject { "/cookbooks/test/#{version}" }
-        behaves_like 'a cookbook version', 'test', version
-      end
-
+    unknown_version = Gem::Version.new(version).bump
+    while versions.include?(unknown_version) do
       unknown_version = Gem::Version.new(version).bump
-      while versions.include?(unknown_version) do
-        unknown_version = Gem::Version.new(version).bump
-      end
+    end
 
-      context "/cookbooks/test/#{unknown_version}" do
-        subject { "/cookbooks/test/#{unknown_version}" }
+    context "/cookbooks/test/#{unknown_version}" do
+      subject { "/cookbooks/test/#{unknown_version}" }
 
-        it 'is not found' do
-          get subject
-          last_response.should be_not_found
-        end
+      it 'is not found' do
+        get subject
+        last_response.should be_not_found
       end
     end
   end
@@ -165,27 +157,43 @@ describe 'with no cookbooks' do
 end
 
 describe 'with a cookbook with 1 version' do
-  versions = ['0.1.0']
-  context '/cookbooks' do
-    subject { '/cookbooks' }
-    behaves_like 'a cookbook', versions
-  end
+  in_temp_dir do |tmp_path|
+    versions = ['0.1.0']
+    before(:all) do
+      @name = 'test'
+      app.set :cookbook_store, tmp_path
+      prepare_cookbook(tmp_path, @name, versions)
+    end
 
-  context '/cookbooks/test' do
-    subject { '/cookbooks/test' }
-    behaves_like 'a cookbook', versions
+    context '/cookbooks' do
+      subject { '/cookbooks' }
+      behaves_like 'a cookbook', versions
+    end
+
+    context '/cookbooks/test' do
+      subject { '/cookbooks/test' }
+      behaves_like 'a cookbook', versions
+    end
   end
 end
 
 describe 'with a cookbook with 3 versions' do
-  versions = ['0.1.0', '0.2.0', '0.10.0']
-  context '/cookbooks' do
-    subject { '/cookbooks' }
-    behaves_like 'a cookbook', versions
-  end
+  in_temp_dir do |tmp_path|
+    versions = ['0.1.0', '0.2.0', '0.10.0']
+    before(:all) do
+      @name = 'test'
+      app.set :cookbook_store, tmp_path
+      prepare_cookbook(tmp_path, @name, versions)
+    end
 
-  context '/cookbooks/test' do
-    subject { '/cookbooks/test' }
-    behaves_like 'a cookbook', versions
+    context '/cookbooks' do
+      subject { '/cookbooks' }
+      behaves_like 'a cookbook', versions
+    end
+
+    context '/cookbooks/test' do
+      subject { '/cookbooks/test' }
+      behaves_like 'a cookbook', versions
+    end
   end
 end
