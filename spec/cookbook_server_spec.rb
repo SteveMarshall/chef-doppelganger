@@ -162,7 +162,19 @@ describe 'with a cookbook with 1 version' do
     before(:all) do
       @name = 'test'
       app.set :cookbook_store, tmp_path
-      prepare_cookbook(tmp_path, @name, versions)
+      prepare_bare_repository(tmp_path, @name, versions) do |repo|
+        versions.each do |version|
+          write_repository_file(repo, "metadata.rb", <<-EOF
+name    "#{@name}"
+version "#{version}"
+description "A test cookbook"
+EOF
+          )
+          repo.add('metadata.rb')
+          repo.commit(version)
+          repo.add_tag("v#{version}")
+        end
+      end
     end
 
     context '/cookbooks' do
@@ -183,7 +195,19 @@ describe 'with a cookbook with 3 versions' do
     before(:all) do
       @name = 'test'
       app.set :cookbook_store, tmp_path
-      prepare_cookbook(tmp_path, @name, versions)
+      prepare_bare_repository(tmp_path, @name, versions) do |repo|
+        versions.each do |version|
+          write_repository_file(repo, "metadata.rb", <<-EOF
+name    "#{@name}"
+version "#{version}"
+description "A test cookbook"
+EOF
+          )
+          repo.add('metadata.rb')
+          repo.commit(version)
+          repo.add_tag("v#{version}")
+        end
+      end
     end
 
     context '/cookbooks' do

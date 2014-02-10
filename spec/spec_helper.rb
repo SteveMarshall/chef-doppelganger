@@ -17,30 +17,28 @@ def in_temp_dir()
   end
 end
 
-def prepare_cookbook(root, name, versions)
+def prepare_bare_repository(root, name, versions)
   # Initialise our test repo
   path = File.join(root, name)
   repo = Git.init(path)
   
-  # Add dummy data
-  Dir.chdir(path) do
-    versions.each do |version|
-      File.open('metadata.rb', 'w') do |f|
-        f.puts <<-EOF
-name    "#{name}"
-version "#{version}"
-description "A test cookbook"
-EOF
-      end
-      repo.add('metadata.rb')
-      repo.commit(version)
-      repo.add_tag("v#{version}")
-    end
-  end
+  yield repo
   
-  # Finalise the structure
+  # Convert our working directory's repo to a bare repo
+  repo.config('core.bare', true)
   FileUtils.mv(File.join(path, ".git"), "#{path}.git")
   FileUtils.rmdir(path)
+end
+
+def write_repository_file(repo, filepath, content)
+  if repo.config('core.bare')
+    raise ArgumentError, "Repo #{repo.dir.to_s} is already bare and cannot be worked with directly", [repo.dir.to_s]
+  end
+  Dir.chdir(repo.dir.to_s) do
+    File.open(filepath, 'w') do |f|
+      f.puts content
+    end
+  end
 end
 
 # For RSpec 2.x
