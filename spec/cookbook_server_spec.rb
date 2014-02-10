@@ -45,7 +45,7 @@ shared_examples 'a cookbook version' do |cookbook_name, version|
     result["name"].should eq("#{cookbook_name}-#{version}")
   end
   
-  it 'returns metadata from metadata.rb' do
+  it 'returns metadata' do
     get subject
     result = JSON.parse(last_response.body)
     
