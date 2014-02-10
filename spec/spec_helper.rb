@@ -31,7 +31,7 @@ def prepare_bare_repository(root, name, versions)
 end
 
 def write_repository_file(repo, filepath, content)
-  if repo.config('core.bare')
+  if 'true' == repo.config('core.bare')
     raise ArgumentError, "Repo #{repo.dir.to_s} is already bare and cannot be worked with directly", [repo.dir.to_s]
   end
   Dir.chdir(repo.dir.to_s) do
