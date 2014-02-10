@@ -158,33 +158,30 @@ end
 
 describe 'with a cookbook with 1 version' do
   in_temp_dir do |tmp_path|
-    versions = ['0.1.0']
     before(:all) do
       @name = 'test'
       app.set :cookbook_store, tmp_path
       prepare_bare_repository(tmp_path, @name) do |repo|
-        versions.each do |version|
-          write_repository_file(repo, "metadata.rb", <<-EOF
+        write_repository_file(repo, "metadata.rb", <<-EOF
 name    "#{@name}"
-version "#{version}"
+version "0.1.0"
 description "A test cookbook"
 EOF
-          )
-          repo.add('metadata.rb')
-          repo.commit(version)
-          repo.add_tag("v#{version}")
-        end
+        )
+        repo.add('metadata.rb')
+        repo.commit('v0.1.0')
+        repo.add_tag("v0.1.0")
       end
     end
 
     context '/cookbooks' do
       subject { '/cookbooks' }
-      behaves_like 'a cookbook', versions
+      behaves_like 'a cookbook', ['0.1.0']
     end
 
     context '/cookbooks/test' do
       subject { '/cookbooks/test' }
-      behaves_like 'a cookbook', versions
+      behaves_like 'a cookbook', ['0.1.0']
     end
   end
 end
