@@ -17,7 +17,7 @@ def in_temp_dir()
   end
 end
 
-def prepare_bare_repository(root, name, versions)
+def prepare_bare_repository(root, name)
   # Initialise our test repo
   path = File.join(root, name)
   repo = Git.init(path)

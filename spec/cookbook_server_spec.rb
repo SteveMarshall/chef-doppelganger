@@ -162,7 +162,7 @@ describe 'with a cookbook with 1 version' do
     before(:all) do
       @name = 'test'
       app.set :cookbook_store, tmp_path
-      prepare_bare_repository(tmp_path, @name, versions) do |repo|
+      prepare_bare_repository(tmp_path, @name) do |repo|
         versions.each do |version|
           write_repository_file(repo, "metadata.rb", <<-EOF
 name    "#{@name}"
@@ -195,7 +195,7 @@ describe 'with a cookbook with 3 versions' do
     before(:all) do
       @name = 'test'
       app.set :cookbook_store, tmp_path
-      prepare_bare_repository(tmp_path, @name, versions) do |repo|
+      prepare_bare_repository(tmp_path, @name) do |repo|
         versions.each do |version|
           write_repository_file(repo, "metadata.rb", <<-EOF
 name    "#{@name}"
