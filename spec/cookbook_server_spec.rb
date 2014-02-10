@@ -51,7 +51,7 @@ shared_examples 'a cookbook version' do |cookbook_name, version|
     
     result['metadata']['name'].should eq(cookbook_name)
     result['metadata']['version'].should eq(version)
-    result['metadata']['description'].should eq("A test cookbook")
+    result['metadata']['description'].should eq(@description)
   end
 end
 
@@ -160,12 +160,13 @@ describe 'with a cookbook with 1 version' do
   in_temp_dir do |tmp_path|
     before(:all) do
       @name = 'test'
+      @description = 'A test cookbook'
       app.set :cookbook_store, tmp_path
       prepare_bare_repository(tmp_path, @name) do |repo|
         write_repository_file(repo, "metadata.rb", <<-EOF
 name    "#{@name}"
 version "0.1.0"
-description "A test cookbook"
+description "#{@description}"
 EOF
         )
         repo.add('metadata.rb')
@@ -191,13 +192,14 @@ describe 'with a cookbook with 3 versions' do
     versions = ['0.1.0', '0.2.0', '0.10.0']
     before(:all) do
       @name = 'test'
+      @description = 'A test cookbook'
       app.set :cookbook_store, tmp_path
       prepare_bare_repository(tmp_path, @name) do |repo|
         versions.each do |version|
           write_repository_file(repo, "metadata.rb", <<-EOF
 name    "#{@name}"
 version "#{version}"
-description "A test cookbook"
+description "#{@description}"
 EOF
           )
           repo.add('metadata.rb')
@@ -215,6 +217,39 @@ EOF
     context '/cookbooks/test' do
       subject { '/cookbooks/test' }
       behaves_like 'a cookbook', versions
+    end
+  end
+end
+
+describe 'with a cookbook with evaluated metadata' do
+  in_temp_dir do |tmp_path|
+    before(:all) do
+      @name = 'test'
+      # HACK: Include \n here so IO.read doesn't add one and break the test
+      @description = "An evaluated test cookbook\n"
+      app.set :cookbook_store, tmp_path
+      prepare_bare_repository(tmp_path, @name) do |repo|
+        write_repository_file(repo, "README.md", @description)
+        write_repository_file(repo, "metadata.rb", <<-EOF
+name    "#{@name}"
+version "0.1.0"
+description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
+EOF
+        )
+        repo.add(['README.md', 'metadata.rb'])
+        repo.commit('v0.1.0')
+        repo.add_tag("v0.1.0")
+      end
+    end
+
+    context '/cookbooks' do
+      subject { '/cookbooks' }
+      behaves_like 'a cookbook', ['0.1.0']
+    end
+
+    context '/cookbooks/test' do
+      subject { '/cookbooks/test' }
+      behaves_like 'a cookbook', ['0.1.0']
     end
   end
 end

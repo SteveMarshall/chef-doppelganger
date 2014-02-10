@@ -56,10 +56,16 @@ get '/cookbooks/:name/:version' do
     pass
   end
   
-  version_tree = repo.gtree("#{version}^{tree}")
-  
   metadata = PretendCookbookMetadata.new(params[:name])
-  metadata.instance_eval(version_tree.files['metadata.rb'].contents)
+  repo.with_temp_working do
+    repo.checkout_index(:all => true)
+    repo.checkout(version)
+    File.open('metadata.rb', 'r') do |metadata_file|
+      metadata_contents = metadata_file.read
+      metadata.instance_eval(metadata_contents, metadata_file.path)
+    end
+  end
+
   content_type :json
   {
     name: "#{params[:name]}-#{params[:version]}",
